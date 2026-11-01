@@ -1,0 +1,44 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+.credentials/
+
+# Node / Next
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+.vercel/
+
+# Python fallback
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local databases and private user data
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+data/
+uploads/
+recordings/
+transcripts/
+private/
+.DS_Store
+Thumbs.db
