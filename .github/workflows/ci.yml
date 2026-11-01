@@ -1,0 +1,21 @@
+name: Vonza Core smoke tests
+on:
+  pull_request:
+  push:
+    branches:
+      - feat/working-mvp
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Use Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check Python syntax
+        run: python -m py_compile server.py tests/test_api.py
+      - name: Run integration tests (no OpenAI calls)
+        run: python -m unittest discover -s tests -v
