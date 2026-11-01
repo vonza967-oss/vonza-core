@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eef4ff">
+<title>Vonza Core</title>
+<style>
+:root{color-scheme:light;--ink:#14243c;--muted:#70809a;--stroke:rgba(109,141,180,.23);--card:rgba(255,255,255,.66);--accent:#5577ed;--accent2:#785af0;--radius:22px;--shadow:0 16px 65px rgba(35,61,114,.08)}
+*{box-sizing:border-box}body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;color:var(--ink);background:#edf3fd;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 60vw 40vw at 10% 6%,#cad9fc 0%,transparent 85%),radial-gradient(ellipse 60vw 40vw at 100% 94%,#ede1ff 0%,transparent 85%),linear-gradient(130deg,#f6fbff,#eaf1fa)}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;background:var(--card);color:var(--ink)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}button:disabled{opacity:.55;cursor:not-allowed}
+input,textarea{color:var(--ink);width:100%;background:rgba(255,255,255,.75);border:1px solid var(--stroke);border-radius:13px;padding:12px 14px;outline:none;resize:vertical}
+input:focus,textarea:focus{border-color:#8199ed}
+button.primary{background:linear-gradient(125deg,var(--accent),var(--accent2));color:#fff;font-weight:650;padding:11px 17px;box-shadow:0 6px 20px #546aee33}
+button.secondary{border:1px solid var(--stroke);padding:9px 13px}
+button.ghost{background:transparent;color:var(--muted);padding:8px 11px}button.ghost:hover{color:var(--ink);background:#ffffff8c}
+button.danger{color:#b5445b}.badge{font-size:11px;padding:4px 9px;border:1px solid var(--stroke);border-radius:99px;color:#596c8a}
+.hidden{display:none!important}.glass{background:var(--card);border:1px solid rgba(255,255,255,.85);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);box-shadow:var(--shadow)}
+.auth{width:min(430px,calc(100% - 28px));margin:12vh auto;padding:32px;border-radius:28px}.brand{display:flex;align-items:center;gap:11px;font-size:18px;font-weight:750;letter-spacing:-.6px}.logo{width:36px;height:36px;border-radius:13px;display:grid;place-items:center;color:white;background:linear-gradient(145deg,#477bfa,#9861f9);font-size:22px;box-shadow:0 7px 18px #6b66ed55}
+.auth h1{font-size:27px;line-height:1.2;margin:35px 0 8px;letter-spacing:-.9px}.auth p{color:var(--muted);margin:0 0 25px}.auth input{margin-bottom:12px}.auth .primary{width:100%;margin-top:6px}
+.layout{height:100vh;padding:16px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:16px}.sidebar{border-radius:23px;padding:21px 14px;display:flex;flex-direction:column;min-height:0}.sidebar .brand{padding:1px 9px 25px}.nav{display:flex;flex-direction:column;gap:5px}.nav button{text-align:left;padding:12px 15px;background:transparent;font-weight:560;color:#63758f}.nav button.active{background:#fff9;border:1px solid #fff;color:#293b65;box-shadow:0 5px 22px #697eab11}.nav button:hover{background:#ffffff8a}
+.side-foot{margin-top:auto;border-top:1px solid var(--stroke);padding:18px 9px 1px}.side-foot p{font-size:12px;color:var(--muted);margin:10px 0 4px}
+.main{border-radius:23px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}.top{padding:18px 24px;border-bottom:1px solid var(--stroke);display:flex;gap:12px;align-items:center;justify-content:space-between}.top h1{margin:0;font-size:17px;letter-spacing:-.3px}.top-right{display:flex;gap:10px;align-items:center}.view{flex:1;min-height:0;display:flex;flex-direction:column}
+.chat-layout{flex:1;display:grid;grid-template-columns:215px minmax(0,1fr);min-height:0}.threads{border-right:1px solid var(--stroke);padding:15px;overflow:auto}.thread-btn{display:block;width:100%;text-align:left;padding:11px 9px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;margin-top:8px;color:#455876;border:1px solid transparent}.thread-btn.selected{background:#fff9;border-color:#ffffffc0}
+.chat-panel{display:flex;flex-direction:column;min-height:0}.chat-content{flex:1;padding:22px min(6%,44px);overflow-y:auto;display:flex;flex-direction:column;gap:14px}.welcome{margin:auto;text-align:center;max-width:430px}.welcome .logo{margin:auto;width:53px;height:53px;font-size:28px;border-radius:19px}.welcome h2{font-size:27px;letter-spacing:-.7px;margin:24px 0 8px}.welcome p{color:var(--muted)}
+.message{max-width:min(82%,710px);white-space:pre-wrap;overflow-wrap:anywhere;border-radius:18px;padding:13px 17px;line-height:1.65}.message.user{align-self:flex-end;background:linear-gradient(125deg,#6683ef,#7767df);color:white;border-bottom-right-radius:5px}.message.assistant{align-self:flex-start;background:#fffac;border:1px solid #fff;border-bottom-left-radius:5px}.message.error{background:#ffe9ee;color:#9b3546}.label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.65;margin-bottom:4px}
+.compose{padding:14px min(5%,37px) 22px}.composer{display:flex;align-items:flex-end;gap:10px;background:#fff9;padding:9px;border:1px solid #fff;border-radius:18px}.composer textarea{background:transparent;border:0;min-height:45px;max-height:130px;resize:none;padding:11px}.composer textarea:focus{outline:none}.composer .primary{height:43px}
+.mic.active{background:#ffedf1;color:#c83e58}.content-view{padding:27px min(6%,40px);overflow:auto;flex:1}.content-view h2{font-size:24px;letter-spacing:-.6px;margin:0 0 7px}.sub{color:var(--muted);margin:0 0 25px}
+.entry{display:flex;gap:10px;align-items:center;margin-bottom:17px}.entry input{flex:1}.entry .primary{white-space:nowrap}.item{display:flex;align-items:center;gap:12px;background:#fff8;border:1px solid #fff;border-radius:15px;padding:13px;margin:9px 0}.item .body{flex:1;min-width:0;overflow-wrap:anywhere}.item small{color:var(--muted)}.item.done .body{text-decoration:line-through;color:#94a0b4}.item input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}.item button{flex-shrink:0}.empty{padding:35px;text-align:center;color:var(--muted)}
+.notice{display:none;margin:0 20px 12px;padding:11px 14px;border-radius:12px;background:#fff6df;color:#885c1a;border:1px solid #f3dfa4}.notice.show{display:block}
+.status{font-size:12px;color:#5b7091}.hint{font-size:12px;color:var(--muted);margin:10px 0 0}
+@media(max-width:800px){.layout{padding:8px;gap:8px;grid-template-columns:65px minmax(0,1fr)}.sidebar{padding:14px 6px}.sidebar .brand span,.nav .word,.side-foot{display:none}.sidebar .brand{padding:4px 6px 22px}.nav button{font-size:21px;text-align:center;padding:10px}.main{border-radius:16px}.chat-layout{grid-template-columns:1fr}.threads{display:none}.top{padding:15px}.chat-content{padding:17px}.compose{padding:10px}.message{max-width:91%}.entry{flex-wrap:wrap}}
+@media(max-width:500px){.layout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);height:100dvh}.sidebar{min-height:54px;flex-direction:row;align-items:center;padding:5px 12px}.sidebar .brand{padding:0}.sidebar .logo{width:30px;height:30px}.nav{flex:1;flex-direction:row;justify-content:flex-end}.nav button{font-size:17px;padding:7px}.main{min-height:0}.top-right .badge{display:none}.content-view{padding:17px}.entry .primary{width:100%}}
+</style>
+</head>
+<body>
+<section id="auth" class="auth glass">
+  <div class="brand"><div class="logo">✧</div><span>VONZA <span style="font-weight:400">CORE</span></span></div>
+  <h1 id="auth-title">Your private AI, ready.</h1>
+  <p id="auth-sub">A personal assistant that works for you.</p>
+  <form id="auth-form"><input id="password" type="password" autocomplete="current-password" minlength="12" placeholder="Password" required><button id="auth-submit" type="submit" class="primary">Continue</button></form>
+  <p class="hint" id="auth-hint">Local-only by default. Your API key stays on the server.</p>
+</section>
+<div id="app" class="layout hidden">
+  <aside class="sidebar glass">
+    <div class="brand"><div class="logo">✧</div><span>VONZA CORE</span></div>
+    <nav class="nav">
+      <button data-view="chat" class="active" title="Chat">◈ <span class="word"> Chat</span></button>
+      <button data-view="tasks" title="Tasks">☑ <span class="word"> Tasks</span></button>
+      <button data-view="memory" title="Memory">◇ <span class="word"> Memory</span></button>
+      <button data-view="settings" title="Settings">⚙ <span class="word"> Settings</span></button>
+    </nav>
+    <div class="side-foot"><span class="badge">Personal workspace</span><p>Version 0.1 · local MVP</p><button id="logout" class="ghost">Sign out ↗</button></div>
+  </aside>
+  <main class="main glass">
+    <div class="top"><h1 id="page-title">Assistant</h1><div class="top-right"><span id="status" class="status">Local workspace</span><span class="badge">PRIVATE</span></div></div>
+    <div id="notice" class="notice" role="alert"></div>
+    <section id="chat" class="view">
+      <div class="chat-layout">
+        <div class="threads"><button id="new-chat" class="secondary" style="width:100%">+ New conversation</button><div id="thread-list"></div></div>
+        <div class="chat-panel">
+          <div id="messages" class="chat-content"><div class="welcome"><div class="logo">✧</div><h2>How can I help?</h2><p>Ask a question, get organized, or talk through your next big idea.</p></div></div>
+          <div class="compose"><div class="composer"><button id="microphone" class="ghost mic" title="Dictate" aria-label="Dictate">🎙</button><textarea id="chat-input" rows="1" placeholder="Ask Vonza anything..."></textarea><button id="speak" class="ghost" title="Toggle spoken answers" aria-label="Toggle spoken answers">🔈</button><button id="send" class="primary">Send ↑</button></div><div class="hint">Enter to send · Shift+Enter for a new line. Voice support depends on your browser.</div></div>
+        </div>
+      </div>
+    </section>
+    <section id="tasks" class="view hidden"><div class="content-view"><h2>Tasks</h2><p class="sub">A quiet place for the things that matter.</p><form id="task-form" class="entry"><input id="task-input" maxlength="300" placeholder="What needs to get done?" required><input id="task-date" type="date" style="max-width:170px"><button class="primary">Add task</button></form><div id="task-list"></div></div></section>
+    <section id="memory" class="view hidden"><div class="content-view"><h2>Memory</h2><p class="sub">Only what you explicitly save stays here. Your chats never automatically become memories.</p><form id="memory-form" class="entry"><input id="memory-input" maxlength="2000" placeholder="Remember that..." required><button class="primary">Save memory</button></form><div id="memory-list"></div></div></section>
+    <section id="settings" class="view hidden"><div class="content-view"><h2>Settings</h2><p class="sub">The control room.</p><div class="item"><div class="body"><b>Language</b><br><small>Interface language. Vonza replies in the language you use.</small></div><button id="lang" class="secondary">Magyar / English</button></div><div class="item"><div class="body"><b>Voice output</b><br><small>Uses your device speech engine. Nothing is recorded by this feature.</small></div><button id="voice-toggle" class="secondary">Off</button></div><div class="item"><div class="body"><b>Model connection</b><br><small>Set OPENAI_API_KEY in the server's local environment. Never paste it into chat or GitHub.</small></div><span class="badge">Server-side</span></div><div class="item"><div class="body"><b>Data storage</b><br><small>Stored in a local SQLite database. This MVP does not encrypt the database at rest. Keep your computer and backups secure.</small></div></div><button id="mobile-logout" class="secondary">Sign out</button></div></section>
+  </main>
+</div>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const all=s=>Array.from(document.querySelectorAll(s));
+const state={cid:null,view:"chat",lang:localStorage.getItem("vonza_lang")||"en",speak:false,recognition:null,busy:false};
+const words={
+en:{chat:"Assistant",tasks:"Tasks",memory:"Memory",settings:"Settings",welcome:"How can I help?",setup:"Create your private workspace",signin:"Welcome back",setupSub:"Choose a strong password to secure your assistant.",signinSub:"Sign in to your assistant.",send:"Send ↑",newChat:"+ New conversation",memoryEmpty:"No saved memories yet.",taskEmpty:"No tasks. A rare and beautiful sight.",chatEmpty:"Ask a question, get organized, or talk through your next big idea."},
+hu:{chat:"Asszisztens",tasks:"Feladatok",memory:"Memória",settings:"Beállítások",welcome:"Miben segíthetek?",setup:"Hozd létre a saját asszisztensed",signin:"Üdv újra!",setupSub:"Állíts be egy erős jelszót.",signinSub:"Jelentkezz be az asszisztensedbe.",send:"Küldés ↑",newChat:"+ Új beszélgetés",memoryEmpty:"Még nincs mentett emlék.",taskEmpty:"Nincsenek feladatok.",chatEmpty:"Kérdezz, tervezz, vagy gondolkodjunk együtt."}
+};
+const tr=k=>words[state.lang][k]||k;
+function notice(msg){const n=$("#notice");n.textContent=msg;n.classList.toggle("show",!!msg);}
+function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
+async function api(path,method="GET",body){
+ const options={method,headers:{"X-Vonza-Request":"1"}};
+ if(body!==undefined){options.headers["Content-Type"]="application/json";options.body=JSON.stringify(body);}
+ const res=await fetch(path,options);
+ let data;try{data=await res.json();}catch(e){throw Error("Invalid server response");}
+ if(!res.ok)throw Error(data.error||"Request failed");
+ return data;
+}
+async function safely(fn){try{notice("");await fn();}catch(e){notice(e.message);}}
+function applyLanguage(){
+ document.documentElement.lang=state.lang;
+ $("#page-title").textContent=tr(state.view);
+ const names=["chat","tasks","memory","settings"];
+ all("[data-view]").forEach((n,i)=>{const icon=n.textContent.trim().split(" ")[0];n.querySelector(".word").textContent=" "+tr(names[i]);});
+ $("#send").textContent=tr("send");$("#new-chat").textContent=tr("newChat");
+}
+async function start(){
+ const auth=await api("/api/auth/status");
+ if(auth.authenticated){$("#auth").classList.add("hidden");$("#app").classList.remove("hidden");await showView("chat");}
+ else{
+  const setup=!auth.setup;$("#auth").classList.remove("hidden");$("#app").classList.add("hidden");
+  $("#auth-title").textContent=tr(setup?"setup":"signin");$("#auth-sub").textContent=tr(setup?"setupSub":"signinSub");
+  $("#auth-form").dataset.setup=String(setup);$("#password").autocomplete=setup?"new-password":"current-password";
+ }
+}
+$("#auth-form").addEventListener("submit",event=>{event.preventDefault();safely(async()=>{
+ const password=$("#password").value,setup=$("#auth-form").dataset.setup==="true";
+ await api(setup?"/api/auth/setup":"/api/auth/login","POST",{password});$("#password").value="";await start();
+});});
+async function showView(name){
+ state.view=name;
+ all("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===name));
+ all(".view").forEach(n=>n.classList.toggle("hidden",n.id!==name));
+ applyLanguage();
+ if(name==="chat")await refreshConversations();
+ if(name==="tasks")await refreshTasks();
+ if(name==="memory")await refreshMemories();
+}
+all("[data-view]").forEach(b=>b.addEventListener("click",()=>safely(()=>showView(b.dataset.view))));
+async function refreshConversations(){
+ const data=await api("/api/conversations"),list=$("#thread-list");list.replaceChildren();
+ data.conversations.forEach(c=>{
+  const btn=el("button","thread-btn"+(c.id===state.cid?" selected":""),c.title);
+  btn.addEventListener("click",()=>safely(()=>openChat(c.id)));list.append(btn);
+ });
+ if(state.cid&&!data.conversations.some(c=>c.id===state.cid))state.cid=null;
+ if(state.cid)await showMessages();
+ else renderWelcome();
+}
+function renderWelcome(){
+ $("#messages").replaceChildren();
+ const w=el("div","welcome");w.append(el("div","logo","✧"),el("h2","",tr("welcome")),el("p","",tr("chatEmpty")));$("#messages").append(w);
+}
+async function openChat(id){state.cid=id;await refreshConversations();}
+async function createChat(){
+ const data=await api("/api/conversations","POST",{title:state.lang==="hu"?"Új beszélgetés":"New conversation"});
+ state.cid=data.id;await refreshConversations();return data.id;
+}
+$("#new-chat").addEventListener("click",()=>safely(createChat));
+function appendMessage(role,content,kind){
+ const list=$("#messages");if(list.querySelector(".welcome"))list.replaceChildren();
+ const item=el("div","message "+(kind||role));
+ item.append(el("div","label",role==="user"?"YOU":"VONZA"),el("div","",content));
+ list.append(item);list.scrollTop=list.scrollHeight;
+}
+async function showMessages(){
+ const data=await api("/api/conversations/"+encodeURIComponent(state.cid)+"/messages");
+ $("#messages").replaceChildren();
+ if(!data.messages.length)renderWelcome();
+ else data.messages.forEach(m=>appendMessage(m.role,m.content));
+}
+async function send(){
+ if(state.busy)return;
+ const input=$("#chat-input"),text=input.value.trim();if(!text)return;
+ state.busy=true;$("#send").disabled=true;$("#status").textContent="Thinking...";
+ try{
+  if(!state.cid)await createChat();
+  input.value="";appendMessage("user",text);
+  const response=await api("/api/chat","POST",{conversation_id:state.cid,message:text});
+  appendMessage("assistant",response.reply);
+  if(state.speak&&"speechSynthesis" in window){speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(response.reply);utterance.lang=state.lang==="hu"?"hu-HU":"en-US";speechSynthesis.speak(utterance);}
+  await refreshConversations();
+ }catch(e){notice(e.message);appendMessage("assistant",e.message,"error");}
+ finally{state.busy=false;$("#send").disabled=false;$("#status").textContent="Local workspace";}
+}
+$("#send").addEventListener("click",send);
+$("#chat-input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
+async function refreshTasks(){
+ const data=await api("/api/tasks"),list=$("#task-list");list.replaceChildren();
+ if(!data.tasks.length){list.append(el("div","empty",tr("taskEmpty")));return;}
+ for(const task of data.tasks){
+  const row=el("div","item"+(task.done?" done":""));const check=el("input");check.type="checkbox";check.checked=!!task.done;check.setAttribute("aria-label","Complete task");
+  check.addEventListener("change",()=>safely(async()=>{await api("/api/tasks/"+task.id,"PATCH",{done:check.checked});await refreshTasks();}));
+  const body=el("div","body");body.append(el("div","",task.title));if(task.due)body.append(el("small","",task.due));
+  const edit=el("button","ghost","Edit");edit.addEventListener("click",()=>safely(async()=>{const title=prompt("Task",task.title);if(title===null)return;await api("/api/tasks/"+task.id,"PATCH",{title});await refreshTasks();}));
+  const del=el("button","ghost danger","Delete");del.addEventListener("click",()=>safely(async()=>{if(confirm("Delete task?")){await api("/api/tasks/"+task.id,"DELETE");await refreshTasks();}}));
+  row.append(check,body,edit,del);list.append(row);
+ }
+}
+$("#task-form").addEventListener("submit",e=>{e.preventDefault();safely(async()=>{
+ await api("/api/tasks","POST",{title:$("#task-input").value,due:$("#task-date").value||null});
+ $("#task-input").value="";$("#task-date").value="";await refreshTasks();
+});});
+async function refreshMemories(){
+ const data=await api("/api/memories"),list=$("#memory-list");list.replaceChildren();
+ if(!data.memories.length){list.append(el("div","empty",tr("memoryEmpty")));return;}
+ for(const memory of data.memories){
+  const row=el("div","item"),body=el("div","body",memory.content);
+  const edit=el("button","ghost","Edit");edit.addEventListener("click",()=>safely(async()=>{const content=prompt("Memory",memory.content);if(content===null)return;await api("/api/memories/"+memory.id,"PATCH",{content});await refreshMemories();}));
+  const del=el("button","ghost danger","Delete");del.addEventListener("click",()=>safely(async()=>{if(confirm("Delete this memory?")){await api("/api/memories/"+memory.id,"DELETE");await refreshMemories();}}));
+  row.append(body,edit,del);list.append(row);
+ }
+}
+$("#memory-form").addEventListener("submit",e=>{e.preventDefault();safely(async()=>{
+ await api("/api/memories","POST",{content:$("#memory-input").value,consent:true});
+ $("#memory-input").value="";await refreshMemories();
+});});
+async function logout(){await api("/api/auth/logout","POST",{});state.cid=null;if("speechSynthesis" in window)speechSynthesis.cancel();await start();}
+$("#logout").addEventListener("click",()=>safely(logout));$("#mobile-logout").addEventListener("click",()=>safely(logout));
+$("#lang").addEventListener("click",()=>safely(async()=>{state.lang=state.lang==="en"?"hu":"en";localStorage.setItem("vonza_lang",state.lang);applyLanguage();await showView(state.view);}));
+function updateSpeak(){const label=state.speak?"On":"Off";$("#voice-toggle").textContent=label;$("#speak").textContent=state.speak?"🔊":"🔈";}
+$("#voice-toggle").addEventListener("click",()=>{state.speak=!state.speak;if(!state.speak&&"speechSynthesis" in window)speechSynthesis.cancel();updateSpeak();});
+$("#speak").addEventListener("click",()=>{state.speak=!state.speak;if(!state.speak&&"speechSynthesis" in window)speechSynthesis.cancel();updateSpeak();});
+$("#microphone").addEventListener("click",()=>{
+ const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!Recognition){notice("Speech recognition is not supported in this browser. Try Chrome or type your message.");return;}
+ if(state.recognition){state.recognition.abort();return;}
+ const recog=new Recognition();state.recognition=recog;recog.lang=state.lang==="hu"?"hu-HU":"en-US";recog.interimResults=false;recog.continuous=false;
+ $("#microphone").classList.add("active");$("#microphone").textContent="■";
+ recog.onresult=e=>{$("#chat-input").value=($("#chat-input").value+" "+e.results[0][0].transcript).trim();};
+ recog.onerror=e=>notice("Microphone: "+e.error);
+ recog.onend=()=>{state.recognition=null;$("#microphone").classList.remove("active");$("#microphone").textContent="🎙";};
+ try{recog.start();}catch(e){recog.onend();notice("Unable to start microphone");}
+});
+start().catch(e=>notice(e.message));
+})();
+</script>
+</body>
+</html>
