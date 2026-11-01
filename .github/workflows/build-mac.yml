@@ -67,7 +67,7 @@ jobs:
           trap 'kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true; rm -rf "$tmp"' EXIT
           ok=false
           for attempt in {1..40}; do
-            if curl --silent --fail --max-time 2 http://127.0.0.1:38087/health | grep -q '"ok": true'; then
+            if curl --silent --fail --max-time 2 -o "$tmp/health.json" http://127.0.0.1:38087/health && grep -q '"ok": true' "$tmp/health.json"; then
               ok=true
               break
             fi
@@ -79,7 +79,8 @@ jobs:
             tail -100 "$tmp/app.log" || true
             exit 1
           fi
-          curl --fail --silent http://127.0.0.1:38087/ | grep -q 'VONZA'
+          curl --fail --silent -o "$tmp/index.html" http://127.0.0.1:38087/
+          grep -q 'VONZA' "$tmp/index.html"
           echo "Bundled app startup and UI passed on macOS arm64."
 
       - name: Prepare Finder-friendly ZIP
