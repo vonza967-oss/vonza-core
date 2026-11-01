@@ -67,7 +67,7 @@ button.danger{color:#b5445b}.badge{font-size:11px;padding:4px 9px;border:1px sol
     </section>
     <section id="tasks" class="view hidden"><div class="content-view"><h2>Tasks</h2><p class="sub">A quiet place for the things that matter.</p><form id="task-form" class="entry"><input id="task-input" maxlength="300" placeholder="What needs to get done?" required><input id="task-date" type="date" style="max-width:170px"><button class="primary">Add task</button></form><div id="task-list"></div></div></section>
     <section id="memory" class="view hidden"><div class="content-view"><h2>Memory</h2><p class="sub">Only what you explicitly save stays here. Your chats never automatically become memories.</p><form id="memory-form" class="entry"><input id="memory-input" maxlength="2000" placeholder="Remember that..." required><button class="primary">Save memory</button></form><div id="memory-list"></div></div></section>
-    <section id="settings" class="view hidden"><div class="content-view"><h2>Settings</h2><p class="sub">The control room.</p><div class="item"><div class="body"><b>Language</b><br><small>Interface language. Vonza replies in the language you use.</small></div><button id="lang" class="secondary">Magyar / English</button></div><div class="item"><div class="body"><b>Voice output</b><br><small>Uses your device speech engine. Nothing is recorded by this feature.</small></div><button id="voice-toggle" class="secondary">Off</button></div><div class="item"><div class="body"><b>Model connection</b><br><small>Set OPENAI_API_KEY in the server's local environment. Never paste it into chat or GitHub.</small></div><span class="badge">Server-side</span></div><div class="item"><div class="body"><b>Data storage</b><br><small>Stored in a local SQLite database. This MVP does not encrypt the database at rest. Keep your computer and backups secure.</small></div></div><button id="mobile-logout" class="secondary">Sign out</button></div></section>
+    <section id="settings" class="view hidden"><div class="content-view"><h2>Settings</h2><p class="sub">The control room.</p><div class="item"><div class="body"><b>Language</b><br><small>Interface language. Vonza replies in the language you use.</small></div><button id="lang" class="secondary">Magyar / English</button></div><div class="item"><div class="body"><b>Voice output</b><br><small>Uses your device speech engine. Nothing is recorded by this feature.</small></div><button id="voice-toggle" class="secondary">Off</button></div><div class="item"><div class="body"><b>AI connection · OpenAI API</b><br><small>Configure your own API key locally after the app starts. Your key is never sent to GitHub and is never shown again. OpenAI API usage is billed separately from ChatGPT.</small></div><span class="badge">Local key storage</span></div><form id="api-form" class="entry" autocomplete="off"><input id="api-key-input" type="password" autocomplete="new-password" placeholder="Paste your OpenAI API key (never into chat)" aria-label="OpenAI API key" required><button class="primary" type="submit">Save key</button></form><div class="item"><div class="body"><b id="api-key-status">Checking API configuration...</b><br><small>Saved in private local application data; not encrypted at rest.</small></div><button id="api-remove" class="secondary danger">Remove key</button></div><div class="item"><div class="body"><b>Data storage</b><br><small>Stored in a local SQLite database. This MVP does not encrypt the database at rest. Keep your computer and backups secure.</small></div></div><button id="mobile-logout" class="secondary">Sign out</button></div></section>
   </main>
 </div>
 <script>
@@ -120,6 +120,7 @@ async function showView(name){
  if(name==="chat")await refreshConversations();
  if(name==="tasks")await refreshTasks();
  if(name==="memory")await refreshMemories();
+ if(name==="settings")await refreshKeyStatus();
 }
 all("[data-view]").forEach(b=>b.addEventListener("click",()=>safely(()=>showView(b.dataset.view))));
 async function refreshConversations(){
@@ -202,6 +203,25 @@ $("#memory-form").addEventListener("submit",e=>{e.preventDefault();safely(async(
 });});
 async function logout(){await api("/api/auth/logout","POST",{});state.cid=null;if("speechSynthesis" in window)speechSynthesis.cancel();await start();}
 $("#logout").addEventListener("click",()=>safely(logout));$("#mobile-logout").addEventListener("click",()=>safely(logout));
+async function refreshKeyStatus(){
+ const status=await api("/api/ai/status");
+ $("#api-key-status").textContent=status.configured
+  ? (state.lang==="hu"?"API-kulcs beállítva.":"API key configured.")
+  : (state.lang==="hu"?"API-kulcs még nincs beállítva.":"No API key configured yet.");
+ $("#api-remove").disabled=!status.configured || status.source==="environment";
+}
+$("#api-form").addEventListener("submit",e=>{e.preventDefault();safely(async()=>{
+ const field=$("#api-key-input"),key=field.value;
+ await api("/api/ai/key","POST",{key});
+ field.value="";
+ await refreshKeyStatus();
+ notice(state.lang==="hu"?"Az API-kulcs helyben mentve.":"API key saved only on this device.");
+});});
+$("#api-remove").addEventListener("click",()=>safely(async()=>{
+ if(!confirm("Remove locally stored API key?"))return;
+ await api("/api/ai/key","DELETE");
+ await refreshKeyStatus();
+}));
 $("#lang").addEventListener("click",()=>safely(async()=>{state.lang=state.lang==="en"?"hu":"en";localStorage.setItem("vonza_lang",state.lang);applyLanguage();await showView(state.view);}));
 function updateSpeak(){const label=state.speak?"On":"Off";$("#voice-toggle").textContent=label;$("#speak").textContent=state.speak?"🔊":"🔈";}
 $("#voice-toggle").addEventListener("click",()=>{state.speak=!state.speak;if(!state.speak&&"speechSynthesis" in window)speechSynthesis.cancel();updateSpeak();});

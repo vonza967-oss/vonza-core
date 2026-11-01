@@ -14,6 +14,22 @@ The `feat/working-mvp` branch contains:
 
 **Development status:** source code and automated test cases exist; real OpenAI API responses, macOS/iPhone microphones, security penetration testing, and deployments have not been independently verified. The prototype is not a production-grade service.
 
+## Recommended on M1 / M2 / M3 Mac: standalone application
+
+The Apple Silicon build workflow compiles a **Vonza Core.app** that bundles its own Python runtime. You do **not** need Python 3.11, Terminal commands, Homebrew, Git, or an API key just to launch this desktop prototype.
+
+1. From a successful [Build Mac app (Apple Silicon)](https://github.com/vonza967-oss/vonza-core/actions/workflows/build-mac.yml) workflow run, download the artifact **Vonza-Core-AppleSilicon** and unzip it to get `Vonza-Core-AppleSilicon.zip`.
+2. Unzip that inner archive and move **Vonza Core.app** to Applications. Open it from Finder. It opens your default browser to a local address, where you can create your owner password.
+3. Later, in the Vonza Core **Settings**, enter an OpenAI Platform API key to enable chat. Tasks and memories work without it.
+
+**macOS security:** The build is ad-hoc signed, **not Apple Developer ID signed or notarized**. Gatekeeper may block the first launch. You may need to right-click the application and choose **Open**, or approve it under **System Settings → Privacy & Security → Open Anyway**, after verifying it came from your own GitHub build. Do not disable macOS security globally or run arbitrary scripts to bypass it. Signing/notarization is future work requiring Apple Developer credentials.
+
+Application data, including a locally stored API key (if supplied), lives at `~/Library/Application Support/Vonza Core/`. Local API-key storage uses user-only filesystem permissions but is **not encrypted at rest**. The web interface is served only on `127.0.0.1`; the app itself is not a publicly hosted service.
+
+**Status:** The build uses an arm64 macOS GitHub runner and performs a bundled-app startup smoke test. The real hardware, microphone, Apple Gatekeeper settings, and live OpenAI responses still require user-device verification.
+
+## Alternative for developers: Python-based launcher
+
 ## Fast Mac setup (recommended)
 
 Clone or download this branch, then open Terminal in the folder and run:

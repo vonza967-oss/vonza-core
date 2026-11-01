@@ -1,0 +1,116 @@
+name: Build Mac app (Apple Silicon)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "app_launcher.py"
+      - "server.py"
+      - "static/**"
+      - "tests/**"
+      - ".github/workflows/build-mac.yml"
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  standalone-mac:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Python for packaging (bundled into the app, not needed on user's Mac)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: "arm64"
+
+      - name: Confirm native Apple Silicon runner
+        shell: bash
+        run: |
+          uname -m
+          test "$(uname -m)" = arm64
+
+      - name: Check source and run tests
+        run: |
+          python -m py_compile server.py app_launcher.py tests/test_api.py
+          python -m unittest discover -s tests -v
+
+      - name: Build a standalone macOS .app
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller==6.17.0
+          python -m PyInstaller \
+            --clean --noconfirm --onedir --windowed \
+            --name "Vonza Core" \
+            --osx-bundle-identifier "hu.vonza.core" \
+            --add-data "static:static" \
+            app_launcher.py
+          test -f "dist/Vonza Core.app/Contents/MacOS/Vonza Core"
+          file "dist/Vonza Core.app/Contents/MacOS/Vonza Core"
+          codesign --verify --verbose "dist/Vonza Core.app"
+
+      - name: Smoke-test bundled app on Apple Silicon with no API key
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          export VONZA_DB="$tmp/test.sqlite3"
+          export VONZA_PORT=38087
+          unset OPENAI_API_KEY || true
+          "dist/Vonza Core.app/Contents/MacOS/Vonza Core" > "$tmp/app.log" 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true; rm -rf "$tmp"' EXIT
+          ok=false
+          for attempt in {1..40}; do
+            if curl --silent --fail --max-time 2 -o "$tmp/health.json" http://127.0.0.1:38087/health && grep -q '"ok": true' "$tmp/health.json"; then
+              ok=true
+              break
+            fi
+            if ! kill -0 "$app_pid" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          if [ "$ok" != true ]; then
+            echo "Frozen app did not start successfully."
+            tail -100 "$tmp/app.log" || true
+            exit 1
+          fi
+          curl --fail --silent -o "$tmp/index.html" http://127.0.0.1:38087/
+          grep -q 'VONZA' "$tmp/index.html"
+          echo "Bundled app startup and UI passed on macOS arm64."
+
+      - name: Prepare Finder-friendly ZIP
+        shell: bash
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent "dist/Vonza Core.app" Vonza-Core-AppleSilicon.zip
+          ls -lh Vonza-Core-AppleSilicon.zip
+
+      - name: Attach packaged app to workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vonza-Core-AppleSilicon
+          path: Vonza-Core-AppleSilicon.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish downloadable preview on GitHub Releases
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="v0.1.1-preview"
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" Vonza-Core-AppleSilicon.zip --clobber
+          else
+            gh release create "$release_tag" Vonza-Core-AppleSilicon.zip \
+              --target "$GITHUB_SHA" \
+              --title "Vonza Core 0.1.1 Apple Silicon preview" \
+              --prerelease \
+              --notes "Unsigned/not notarized local prototype for M1/M2/M3 Macs. Python is bundled; no Python install required. AI API key is added later inside Settings. Follow README security guidance before first launch."
+          fi
