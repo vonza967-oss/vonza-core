@@ -400,9 +400,6 @@ class Handler(BaseHTTPRequestHandler):
         try:
             data = self.read_json()
             owner = self.auth()
-            if urlparse(self.path).path == "/api/ai/key":
-                (DB_PATH.parent / "openai_api_key").unlink(missing_ok=True)
-                return self.respond(200, {"ok": True})
             parts = urlparse(self.path).path.strip("/").split("/")
             if len(parts) != 3 or parts[0] != "api":
                 raise ApiError(404, "Not found")
@@ -455,6 +452,9 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get("X-Vonza-Request") != "1":
                 raise ApiError(403, "Missing request header")
             owner = self.auth()
+            if urlparse(self.path).path == "/api/ai/key":
+                (DB_PATH.parent / "openai_api_key").unlink(missing_ok=True)
+                return self.respond(200, {"ok": True})
             parts = urlparse(self.path).path.strip("/").split("/")
             if len(parts) != 3 or parts[0] != "api":
                 raise ApiError(404, "Not found")
