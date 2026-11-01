@@ -9,6 +9,7 @@ import json
 import os
 import secrets
 import sqlite3
+import sys
 import threading
 import time
 import urllib.error
@@ -19,8 +20,16 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent
-DB_PATH = Path(os.environ.get("VONZA_DB", str(ROOT / "data" / "vonza.sqlite3")))
-STATIC = ROOT / "static" / "index.html"
+RESOURCE_ROOT = Path(getattr(sys, "_MEIPASS", ROOT))
+# Frozen app bundles are read-only and may move; store private data in the
+# user's Application Support folder rather than inside the .app bundle.
+LOCAL_DATA_DIR = (
+    Path.home() / "Library" / "Application Support" / "Vonza Core"
+    if getattr(sys, "frozen", False)
+    else ROOT / "data"
+)
+DB_PATH = Path(os.environ.get("VONZA_DB", str(LOCAL_DATA_DIR / "vonza.sqlite3")))
+STATIC = RESOURCE_ROOT / "static" / "index.html"
 MAX_BODY = 30_000
 LOCK = threading.RLock()
 LOGIN_ATTEMPTS: dict[str, list[float]] = {}
@@ -420,12 +429,14 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(500, {"error": "Unexpected server error"})
 
 
-def main():
+def main(on_ready=None):
     initialize()
     host = os.environ.get("VONZA_HOST", "127.0.0.1")
     port = int(os.environ.get("VONZA_PORT", "3000"))
     server = ThreadingHTTPServer((host, port), Handler)
     print("Vonza Core available at http://%s:%s" % (host, server.server_port), flush=True)
+    if on_ready is not None:
+        on_ready(server.server_port)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
