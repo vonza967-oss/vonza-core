@@ -11,6 +11,13 @@ Build Vonza Core from scratch as a private, dependable personal AI assistant wit
 - Do not claim real-world integrations or tests work unless verified.
 - Commit and/or open a PR with implemented changes when the environment permits. Do not force push or rewrite history.
 
+## Confirmed architecture decision (2026-11-01)
+- **Use the OpenAI API for Vonza Core v1.** The owner explicitly chose API-based intelligence over local Ollama / LM Studio inference for now. Do not switch the active AI connection to Ollama or start any local model download without a new request.
+- Keep `OPENAI_API_KEY` **server-side only**, set via private runtime environment variables; a ChatGPT subscription is not API credit. Usage is metered and requires API billing.
+- Prefer a cost-efficient model by default and put usage safety controls and a spending cap/alert plan on the roadmap; never claim a provider-level hard cap that hasn't actually been configured.
+- Structure AI integration behind a replaceable provider interface so Ollama or LM Studio can be considered *later* without rebuilding chat, tasks, memory, and voice.
+- Disclose that API chat messages and included saved-memory context are transmitted to the model provider. Don't claim purely local AI operation.
+
 ## Experience and design
 - Hungarian and English, with clear language selection and reliable language consistency.
 - Premium, fast, desktop-first and mobile-responsive interface: bright translucent/glass appearance by default, dark mode optional. Functional accessibility and readability take priority over visual effects.
