@@ -14,7 +14,19 @@ The `feat/working-mvp` branch contains:
 
 **Development status:** source code and automated test cases exist; real OpenAI API responses, macOS/iPhone microphones, security penetration testing, and deployments have not been independently verified. The prototype is not a production-grade service.
 
-## Local run (macOS with Python 3.11+)
+## Fast Mac setup (recommended)
+
+Clone or download this branch, then open Terminal in the folder and run:
+
+```sh
+bash run-mac.sh
+```
+
+On the first run the script prompts for an **existing OpenAI Platform API key** without displaying what you type. It keeps it locally in `data/openai_api_key` (excluded from GitHub) with owner-only file permissions, then starts the app at **http://127.0.0.1:3000**. You can paste the key when asked, or press Enter to start without AI chat. If you have already set `OPENAI_API_KEY` in the environment, the script uses that instead. This is a **local development prototype**, not a hosted service.
+
+An OpenAI API key requires Platform API access/billing; a ChatGPT subscription alone does not fund API usage. The script does not create API credentials or set billing limits. When you no longer want a locally saved key, delete `data/openai_api_key`. Never commit or share that file.
+
+## Manual local run (macOS with Python 3.11+)
 
 1. Install Python 3.11 or newer if not already installed.
 2. Clone the repository and check out the prototype branch:
