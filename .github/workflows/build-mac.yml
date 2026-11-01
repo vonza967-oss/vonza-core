@@ -13,7 +13,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   standalone-mac:
@@ -95,3 +95,21 @@ jobs:
           path: Vonza-Core-AppleSilicon.zip
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish downloadable preview on GitHub Releases
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="v0.1.1-preview"
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" Vonza-Core-AppleSilicon.zip --clobber
+          else
+            gh release create "$release_tag" Vonza-Core-AppleSilicon.zip \
+              --target "$GITHUB_SHA" \
+              --title "Vonza Core 0.1.1 Apple Silicon preview" \
+              --prerelease \
+              --notes "Unsigned/not notarized local prototype for M1/M2/M3 Macs. Python is bundled; no Python install required. AI API key is added later inside Settings. Follow README security guidance before first launch."
+          fi
