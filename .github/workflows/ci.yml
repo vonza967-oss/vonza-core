@@ -17,5 +17,7 @@ jobs:
           python-version: '3.11'
       - name: Check Python syntax
         run: python -m py_compile server.py tests/test_api.py
+      - name: Check Mac launcher syntax
+        run: bash -n run-mac.sh
       - name: Run integration tests (no OpenAI calls)
         run: python -m unittest discover -s tests -v
