@@ -136,6 +136,26 @@ class ApiTests(unittest.TestCase):
                      "id=\"microphone\"", "id=\"auth-form\"", "textContent"):
             self.assertIn(part, page)
 
+    def test_075_local_api_setup_without_terminal(self):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": ""}):
+            st, result, _ = self.api("/api/ai/status", cookie=self.cookie)
+            self.assertEqual(st, 200)
+            self.assertEqual(result["configured"], False)
+            self.assertNotIn("key", result)
+            self.assertEqual(self.api("/api/ai/key", "POST", {"key": "short"}, self.cookie)[0], 400)
+            self.assertEqual(self.api("/api/ai/key", "POST", {"key": "not-a-real-test-token-12345678"})[0], 401)
+            st, result, _ = self.api("/api/ai/key", "POST",
+                                     {"key": "not-a-real-test-token-12345678"}, self.cookie)
+            self.assertEqual(st, 200)
+            self.assertEqual(result, {"ok": True, "configured": True})
+            key_file = server.DB_PATH.parent / "openai_api_key"
+            self.assertTrue(key_file.exists())
+            self.assertEqual(server.current_api_key(), "not-a-real-test-token-12345678")
+            self.assertEqual(self.api("/api/ai/status", cookie=self.cookie)[1]["source"], "local")
+            self.assertEqual(self.api("/api/ai/key", "DELETE", cookie=self.cookie)[0], 200)
+            self.assertFalse(key_file.exists())
+            self.assertFalse(self.api("/api/ai/status", cookie=self.cookie)[1]["configured"])
+
     def test_08_logout_revokes_session(self):
         st, _, cookie = self.api("/api/auth/logout", "POST", {}, self.cookie)
         self.assertEqual(st, 200)
